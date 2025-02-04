@@ -1,0 +1,58 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+
+ENTITY chenillard_1_7 IS
+    PORT (
+        CLOCK_50  : IN STD_LOGIC;        
+        reset     : IN STD_LOGIC;        
+        speed     : IN STD_LOGIC_VECTOR(1 DOWNTO 0);  
+        leds_red  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);  
+        leds_green: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  
+    );
+END ENTITY chenillard_1_7;
+
+ARCHITECTURE behavior OF chenillard_1_7 IS
+    COMPONENT clock_divider
+        PORT (
+            CLOCK_50 : IN STD_LOGIC;
+            reset    : IN STD_LOGIC;
+            speed    : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+            clk_out  : OUT STD_LOGIC
+        );
+    END COMPONENT;
+
+    SIGNAL clk_slow  : STD_LOGIC;  
+    SIGNAL triplet_index : INTEGER RANGE 0 TO 5 := 0;  
+
+BEGIN
+    -- Instanciation du diviseur de fréquence
+    clk_div : clock_divider PORT MAP (
+        CLOCK_50 => CLOCK_50,
+        reset    => reset,
+        speed    => speed,
+        clk_out  => clk_slow
+    );
+
+    -- Processus pour gérer les LEDs vertes par triplets
+    PROCESS (clk_slow, reset)
+    BEGIN
+        IF reset = '1' THEN
+            triplet_index <= 0;
+            leds_red      <= "00000000";  
+            leds_green    <= "00000111";  -- Triplet initial (0, 1, 2)
+        ELSIF rising_edge(clk_slow) THEN
+            leds_green <= (OTHERS => '0');  
+            leds_green(triplet_index)   <= '1';  -- Allume la LED verte
+            leds_green(triplet_index+1) <= '1';  -- Allume la LED verte suivante
+            leds_green(triplet_index+2) <= '1';  -- Allume la LED verte suivante
+
+            -- Incrémentation du triplet
+            IF triplet_index = 5 THEN
+                triplet_index <= 0;  -- Recommence au début
+            ELSE
+                triplet_index <= triplet_index + 1;
+            END IF;
+        END IF;
+    END PROCESS;
+
+END ARCHITECTURE behavior;
