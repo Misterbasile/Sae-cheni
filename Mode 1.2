@@ -5,7 +5,7 @@ ENTITY chenillard_1_2 IS
     PORT (
         clk_out  : IN STD_LOGIC;         -- Horloge lente provenant du clock_divider
         reset    : IN STD_LOGIC;         -- Bouton de réinitialisation
-        leds     : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  -- Sortie vers les LEDs rouges
+        LEDR     : OUT STD_LOGIC_VECTOR(9 DOWNTO 0)  -- Sortie vers les LEDs rouges
     );
 END ENTITY chenillard_1_2;
 
@@ -20,10 +20,11 @@ BEGIN
         IF reset = '1' THEN
             led_counter <= 0;
             direction <= '0';
-            leds <= "00000001";  
+            LEDR <= (OTHERS => '0');  
+            LEDR(0) <= '1';  
         ELSIF rising_edge(clk_out) THEN
-            leds <= (OTHERS => '0');  
-            leds(led_counter) <= '1';  
+            LEDR <= (OTHERS => '0');  
+            LEDR(led_counter) <= '1';  
 
             -- Changement de direction
             IF direction = '0' THEN  -- Avance vers la droite
