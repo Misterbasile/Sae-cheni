@@ -1,56 +1,54 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.STD_LOGIC_ARITH.ALL;
-USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 ENTITY clock_divider IS
     PORT (
-        CLOCK_50 : IN STD_LOGIC;        -- Horloge de base 50 MHz
-        reset    : IN STD_LOGIC;        -- Réinitialisation
-        speed    : IN STD_LOGIC_VECTOR(1 DOWNTO 0); -- Sélection vitesse (00 = 1Hz, 01 = 3Hz, 10 = 6Hz, 11 = 9Hz)
-        clk_out  : OUT STD_LOGIC        -- Horloge divisée
+        CLOCK_50 : IN STD_LOGIC;  
+        reset    : IN STD_LOGIC;  
+        SW       : IN STD_LOGIC_VECTOR(1 DOWNTO 0);  -- Sélection de la vitesse
+        clk_out  : OUT STD_LOGIC  
     );
 END ENTITY clock_divider;
 
 ARCHITECTURE behavior OF clock_divider IS
-    SIGNAL counter   : INTEGER := 0;
-    SIGNAL clk_state : STD_LOGIC := '0';
-    CONSTANT MAX_COUNT_1HZ : INTEGER := 50000000 / 2;
-    CONSTANT MAX_COUNT_3HZ : INTEGER := 16666667 / 2;
-    CONSTANT MAX_COUNT_6HZ : INTEGER := 8333333 / 2;
-    CONSTANT MAX_COUNT_9HZ : INTEGER := 5555556 / 2;
-    SIGNAL max_count : INTEGER := MAX_COUNT_1HZ; -- Par défaut à 1Hz
+    SIGNAL counter      : INTEGER := 0;
+    SIGNAL clk_internal : STD_LOGIC := '0';
+    CONSTANT div_1Hz    : INTEGER := 25000000;  -- 50M / (2*1) = 25M
+    CONSTANT div_3Hz    : INTEGER := 8333333;   -- 50M / (2*3) = 8.33M
+    CONSTANT div_6Hz    : INTEGER := 4166666;   -- 50M / (2*6) = 4.16M
+    CONSTANT div_9Hz    : INTEGER := 2777777;   -- 50M / (2*9) = 2.77M
+
+    SIGNAL div_value : INTEGER := div_1Hz;  -- Valeur de division active
 
 BEGIN
-
-    -- Sélection de la fréquence en fonction de "speed"
-    PROCESS (speed)
+    -- Sélection du diviseur en fonction des switchs
+    PROCESS (SW)
     BEGIN
-        CASE speed IS
-            WHEN "00" => max_count <= MAX_COUNT_1HZ; -- 1Hz
-            WHEN "01" => max_count <= MAX_COUNT_3HZ; -- 3Hz
-            WHEN "10" => max_count <= MAX_COUNT_6HZ; -- 6Hz
-            WHEN "11" => max_count <= MAX_COUNT_9HZ; -- 9Hz
-            WHEN OTHERS => max_count <= MAX_COUNT_1HZ;
+        CASE SW IS
+            WHEN "00" => div_value <= div_1Hz;
+            WHEN "01" => div_value <= div_3Hz;
+            WHEN "10" => div_value <= div_6Hz;
+            WHEN "11" => div_value <= div_9Hz;
+            WHEN OTHERS => div_value <= div_1Hz;  -- Valeur par défaut
         END CASE;
     END PROCESS;
 
-    -- Processus pour diviser l'horloge
+    -- Génération de l'horloge lente
     PROCESS (CLOCK_50, reset)
     BEGIN
         IF reset = '1' THEN
-            counter <= 0;
-            clk_state <= '0';
+            counter      <= 0;
+            clk_internal <= '0';
         ELSIF rising_edge(CLOCK_50) THEN
-            IF counter >= max_count THEN
-                counter <= 0;
-                clk_state <= NOT clk_state;
+            IF counter >= div_value THEN
+                counter      <= 0;
+                clk_internal <= NOT clk_internal;
             ELSE
                 counter <= counter + 1;
             END IF;
         END IF;
     END PROCESS;
 
-    clk_out <= clk_state; -- Sortie horloge divisée
+    clk_out <= clk_internal;
 
 END ARCHITECTURE behavior;
