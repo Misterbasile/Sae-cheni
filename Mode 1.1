@@ -1,15 +1,15 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
-ENTITY chenillard_1_1 IS
+ENTITY mod_1_1 IS
     PORT (
         clk_out  : IN STD_LOGIC;         -- Horloge lente provenant du clock_divider
         reset    : IN STD_LOGIC;         -- Bouton de réinitialisation
-        leds     : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  -- Sortie vers les LEDs rouges
+        LEDR     : OUT STD_LOGIC_VECTOR(9 DOWNTO 0)  -- Sortie vers les LEDs rouges
     );
-END ENTITY chenillard_1_1;
+END ENTITY mod_1_1;
 
-ARCHITECTURE behavior OF chenillard_1_1 IS
+ARCHITECTURE behavior OF mod_1_1 IS
     SIGNAL led_counter : INTEGER RANGE 0 TO 7 := 0;  -- Compteur pour allumer les LEDs une par une
 
 BEGIN
@@ -18,10 +18,11 @@ BEGIN
     BEGIN
         IF reset = '1' THEN
             led_counter <= 0;
-            leds <= "00000001";  -- Allume la première LED
+            LEDR <= (OTHERS => '0');  
+            LEDR(0) <= '1';  -- Allume la première LED
         ELSIF rising_edge(clk_out) THEN
-            leds <= (OTHERS => '0');  -- Éteint toutes les LEDs
-            leds(led_counter) <= '1';  -- Allume seulement la LED correspondant au compteur
+            LEDR <= (OTHERS => '0');  -- Éteint toutes les LEDs
+            LEDR(led_counter) <= '1';  -- Allume seulement la LED correspondant au compteur
 
             -- Passe à la LED suivante
             led_counter <= (led_counter + 1) MOD 8;  
@@ -29,3 +30,4 @@ BEGIN
     END PROCESS;
 
 END ARCHITECTURE behavior;
+
