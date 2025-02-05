@@ -11,23 +11,13 @@ ENTITY RAZ IS
 END ENTITY RAZ;
 
 ARCHITECTURE behavior OF RAZ IS
-    SIGNAL led_toggle : STD_LOGIC := '0';  -- Signal de basculement pour l'affichage des LEDs
 BEGIN
     -- Processus de réinitialisation des LEDs
-    PROCESS (CLOCK_50, KEY)
+    PROCESS (KEY)
     BEGIN
         IF KEY(2) = '0' THEN  -- Bouton KEY(2) appuyé (actif bas)
             LEDR <= (OTHERS => '0');  -- Éteint toutes les LEDs rouges
             LEDG <= (OTHERS => '0');  -- Éteint toutes les LEDs vertes
-        ELSE
-            -- Exemple de basculement du signal led_toggle pour faire clignoter les LEDs
-            IF rising_edge(CLOCK_50) THEN
-                led_toggle <= NOT led_toggle;  -- Change l'état de led_toggle à chaque front montant de l'horloge
-            END IF;
-            
-            -- Utilisation de led_toggle pour activer la première LED dans chaque groupe
-            LEDR(0) <= led_toggle;  -- Allume la première LED rouge
-            LEDG(0) <= NOT led_toggle;  -- Allume la première LED verte (opposé de LEDR)
         END IF;
     END PROCESS;
 
