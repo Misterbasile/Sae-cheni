@@ -5,18 +5,29 @@ ENTITY RAZ IS
     PORT (
         CLOCK_50  : IN STD_LOGIC;        
         KEY       : IN STD_LOGIC_VECTOR(2 DOWNTO 0);  -- Bouton KEY(2) utilisé
-        leds_red  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);  
-        leds_green: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  
+        LEDR      : OUT STD_LOGIC_VECTOR(9 DOWNTO 0);  -- LEDs rouges (10 bits)
+        LEDG      : OUT STD_LOGIC_VECTOR(9 DOWNTO 0)   -- LEDs vertes (10 bits)
     );
 END ENTITY RAZ;
 
 ARCHITECTURE behavior OF RAZ IS
+    SIGNAL led_toggle : STD_LOGIC := '0';  -- Signal de basculement pour l'affichage des LEDs
 BEGIN
-    PROCESS (KEY)
+    -- Processus de réinitialisation des LEDs
+    PROCESS (CLOCK_50, KEY)
     BEGIN
         IF KEY(2) = '0' THEN  -- Bouton KEY(2) appuyé (actif bas)
-            leds_red   <= "00000000";  
-            leds_green <= "00000000";  
+            LEDR <= (OTHERS => '0');  -- Éteint toutes les LEDs rouges
+            LEDG <= (OTHERS => '0');  -- Éteint toutes les LEDs vertes
+        ELSE
+            -- Exemple de basculement du signal led_toggle pour faire clignoter les LEDs
+            IF rising_edge(CLOCK_50) THEN
+                led_toggle <= NOT led_toggle;  -- Change l'état de led_toggle à chaque front montant de l'horloge
+            END IF;
+            
+            -- Utilisation de led_toggle pour activer la première LED dans chaque groupe
+            LEDR(0) <= led_toggle;  -- Allume la première LED rouge
+            LEDG(0) <= NOT led_toggle;  -- Allume la première LED verte (opposé de LEDR)
         END IF;
     END PROCESS;
 
