@@ -1,0 +1,23 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+
+ENTITY RAZ IS
+    PORT (
+        CLOCK_50  : IN STD_LOGIC;        
+        KEY       : IN STD_LOGIC_VECTOR(2 DOWNTO 0);  -- Bouton KEY(2) utilisé
+        leds_red  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);  
+        leds_green: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  
+    );
+END ENTITY RAZ;
+
+ARCHITECTURE behavior OF RAZ IS
+BEGIN
+    PROCESS (KEY)
+    BEGIN
+        IF KEY(2) = '0' THEN  -- Bouton KEY(2) appuyé (actif bas)
+            leds_red   <= "00000000";  
+            leds_green <= "00000000";  
+        END IF;
+    END PROCESS;
+
+END ARCHITECTURE behavior;
