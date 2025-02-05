@@ -3,44 +3,25 @@ USE IEEE.STD_LOGIC_1164.ALL;
 
 ENTITY chenillard_1_2 IS
     PORT (
-        CLOCK_50 : IN STD_LOGIC;        
-        reset    : IN STD_LOGIC;        
-        speed    : IN STD_LOGIC_VECTOR(1 DOWNTO 0);  
-        leds     : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  
+        clk_out  : IN STD_LOGIC;         -- Horloge lente provenant du clock_divider
+        reset    : IN STD_LOGIC;         -- Bouton de réinitialisation
+        leds     : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  -- Sortie vers les LEDs rouges
     );
 END ENTITY chenillard_1_2;
 
 ARCHITECTURE behavior OF chenillard_1_2 IS
-    COMPONENT clock_divider
-        PORT (
-            CLOCK_50 : IN STD_LOGIC;
-            reset    : IN STD_LOGIC;
-            speed    : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
-            clk_out  : OUT STD_LOGIC
-        );
-    END COMPONENT;
-
-    SIGNAL clk_slow  : STD_LOGIC;  
     SIGNAL led_counter : INTEGER RANGE 0 TO 7 := 0;
     SIGNAL direction   : STD_LOGIC := '0';  -- '0' = droite, '1' = gauche
 
 BEGIN
-    -- Instanciation du diviseur de fréquence
-    clk_div : clock_divider PORT MAP (
-        CLOCK_50 => CLOCK_50,
-        reset    => reset,
-        speed    => speed,
-        clk_out  => clk_slow
-    );
-
     -- Processus pour gérer les LEDs rouges en aller-retour
-    PROCESS (clk_slow, reset)
+    PROCESS (clk_out, reset)
     BEGIN
         IF reset = '1' THEN
             led_counter <= 0;
             direction <= '0';
             leds <= "00000001";  
-        ELSIF rising_edge(clk_slow) THEN
+        ELSIF rising_edge(clk_out) THEN
             leds <= (OTHERS => '0');  
             leds(led_counter) <= '1';  
 
