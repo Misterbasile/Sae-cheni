@@ -88,3 +88,90 @@ BEGIN
     END PROCESS;
 
 END ARCHITECTURE behavior;
+___
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+
+ENTITY chenillard_1_4 IS
+    PORT (
+        CLOCK_50  : IN STD_LOGIC;        
+        reset     : IN STD_LOGIC;        
+        speed     : IN STD_LOGIC_VECTOR(1 DOWNTO 0);  
+        enable    : IN STD_LOGIC;  -- Activation du mode
+        leds_red  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);  
+        leds_green: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  
+    );
+END ENTITY chenillard_1_4;
+
+ARCHITECTURE behavior OF chenillard_1_4 IS
+    COMPONENT clock_divider
+        PORT (
+            CLOCK_50 : IN STD_LOGIC;
+            reset    : IN STD_LOGIC;
+            speed    : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+            clk_out  : OUT STD_LOGIC
+        );
+    END COMPONENT;
+
+    SIGNAL clk_slow        : STD_LOGIC;  
+    SIGNAL led_counter     : INTEGER RANGE 0 TO 7 := 0;
+    SIGNAL direction_red   : STD_LOGIC := '0';  -- '0' = droite, '1' = gauche
+    SIGNAL direction_green : STD_LOGIC := '0';  -- '0' = gauche, '1' = droite
+
+BEGIN
+    -- Instanciation du diviseur de fréquence
+    clk_div : clock_divider PORT MAP (
+        CLOCK_50 => CLOCK_50,
+        reset    => reset,
+        speed    => speed,
+        clk_out  => clk_slow
+    );
+
+    -- Processus pour gérer les LEDs rouges et vertes en aller-retour
+    PROCESS (clk_slow, reset)
+    BEGIN
+        IF reset = '1' THEN
+            led_counter <= 0;
+            direction_red <= '0';
+            direction_green <= '0';
+            leds_red   <= (OTHERS => '0');  
+            leds_green <= (OTHERS => '0');  
+        ELSIF rising_edge(clk_slow) THEN
+            IF enable = '1' THEN  -- Vérifie si le mode est activé
+                leds_red   <= (OTHERS => '0');  
+                leds_green <= (OTHERS => '0');  
+                leds_red(led_counter) <= '1';  
+                leds_green(7 - led_counter) <= '1';  
+
+                -- Changement de direction pour les LEDs rouges
+                IF direction_red = '0' THEN  -- Avance vers la droite
+                    IF led_counter = 7 THEN
+                        direction_red <= '1';
+                        led_counter <= 6;
+                    ELSE
+                        led_counter <= led_counter + 1;
+                    END IF;
+                ELSE  -- Recul vers la gauche
+                    IF led_counter = 0 THEN
+                        direction_red <= '0';
+                        led_counter <= 1;
+                    ELSE
+                        led_counter <= led_counter - 1;
+                    END IF;
+                END IF;
+
+                -- Changement de direction pour les LEDs vertes
+                IF direction_green = '0' THEN  -- Avance vers la gauche
+                    IF led_counter = 7 THEN
+                        direction_green <= '1';
+                    END IF;
+                ELSE  -- Recul vers la droite
+                    IF led_counter = 0 THEN
+                        direction_green <= '0';
+                    END IF;
+                END IF;
+            END IF;
+        END IF;
+    END PROCESS;
+
+END ARCHITECTURE behavior;
