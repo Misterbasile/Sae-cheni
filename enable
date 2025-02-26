@@ -1,0 +1,60 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+
+ENTITY mode_selector IS
+    PORT (
+        SW        : IN STD_LOGIC_VECTOR(5 DOWNTO 3);  -- Sélection du mode (3 bits)
+        enable_1_1 : OUT STD_LOGIC;
+        enable_1_2 : OUT STD_LOGIC;
+        enable_1_3 : OUT STD_LOGIC;
+        enable_1_4 : OUT STD_LOGIC;
+        enable_1_5 : OUT STD_LOGIC;
+        enable_1_6 : OUT STD_LOGIC;
+        enable_1_7 : OUT STD_LOGIC;
+        enable_2_1 : OUT STD_LOGIC;
+        enable_2_2 : OUT STD_LOGIC;
+        enable_2_3 : OUT STD_LOGIC;
+        enable_2_4 : OUT STD_LOGIC;
+        enable_2_5 : OUT STD_LOGIC;
+        enable_2_6 : OUT STD_LOGIC;
+        enable_2_7 : OUT STD_LOGIC
+    );
+END ENTITY mode_selector;
+
+ARCHITECTURE behavior OF mode_selector IS
+BEGIN
+    PROCESS (SW)
+    BEGIN
+        -- Désactive tous les modes par défaut
+        enable_1_1 <= '0';
+        enable_1_2 <= '0';
+        enable_1_3 <= '0';
+        enable_1_4 <= '0';
+        enable_1_5 <= '0';
+        enable_1_6 <= '0';
+        enable_1_7 <= '0';
+        enable_2_1 <= '0';
+        enable_2_2 <= '0';
+        enable_2_3 <= '0';
+        enable_2_4 <= '0';
+        enable_2_5 <= '0';
+        enable_2_6 <= '0';
+        enable_2_7 <= '0';
+
+        -- Activation du mode en fonction des switchs
+        CASE SW IS
+            WHEN "000" => enable_1_1 <= '1';
+            WHEN "001" => enable_1_2 <= '1';
+            WHEN "010" => enable_1_3 <= '1';
+            WHEN "011" => enable_1_4 <= '1';
+            WHEN "100" => enable_1_5 <= '1';
+            WHEN "101" => enable_1_6 <= '1';
+            WHEN "110" => enable_1_7 <= '1';
+            WHEN "111" => 
+                -- Une autre valeur peut être utilisée pour activer les modes 2.x si besoin
+                enable_2_1 <= '1';  
+            WHEN OTHERS => NULL;
+        END CASE;
+    END PROCESS;
+
+END ARCHITECTURE behavior;
