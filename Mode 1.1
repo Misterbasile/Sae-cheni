@@ -38,7 +38,7 @@ ENTITY chenillard_1_1 IS
     PORT (
         clk_out  : IN STD_LOGIC;
         reset     : IN STD_LOGIC;
-        enable    : IN STD_LOGIC;  -- Activation du mode
+        enable_1_1    : IN STD_LOGIC;  -- Activation du mode
         leds_red  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
         leds_green: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
     );
@@ -55,7 +55,7 @@ BEGIN
             leds_red  <= (OTHERS => '0');  
             leds_green <= (OTHERS => '0');
         ELSIF rising_edge(clk_out) THEN
-            IF enable = '1' THEN
+            IF enable_1_1 = '1' THEN
                 leds_red   <= (OTHERS => '0');  
                 leds_red(led_index) <= '1';  
                 led_index <= (led_index + 1) MOD 8;  
