@@ -1,0 +1,66 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_ARITH.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+ENTITY mode_2_5 IS
+    PORT (
+        CLOCK_50  : IN STD_LOGIC;
+        reset     : IN STD_LOGIC;
+        hex0, hex1, hex2, hex3 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0)
+    );
+END ENTITY mode_2_5;
+
+ARCHITECTURE behavior OF mode_2_5 IS
+    COMPONENT clock_divider
+        PORT (
+            CLOCK_50 : IN STD_LOGIC;
+            reset    : IN STD_LOGIC;
+            clk_out  : OUT STD_LOGIC
+        );
+    END COMPONENT;
+
+    SIGNAL clk_slow : STD_LOGIC;
+    SIGNAL display_state : INTEGER RANGE 0 TO 3 := 0;
+
+    CONSTANT SEG_0 : STD_LOGIC_VECTOR(6 DOWNTO 0) := "1000000"; -- 0
+    CONSTANT SEG_2 : STD_LOGIC_VECTOR(6 DOWNTO 0) := "0100100"; -- 2
+    CONSTANT SEG_5 : STD_LOGIC_VECTOR(6 DOWNTO 0) := "0010010"; -- 5
+    CONSTANT SEG_OFF : STD_LOGIC_VECTOR(6 DOWNTO 0) := "1111111"; -- Éteint
+
+BEGIN
+    clk_div : clock_divider PORT MAP (
+        CLOCK_50 => CLOCK_50,
+        reset    => reset,
+        clk_out  => clk_slow
+    );
+
+    PROCESS (clk_slow, reset)
+    BEGIN
+        IF reset = '1' THEN
+            display_state <= 0;
+            hex0 <= SEG_OFF;
+            hex1 <= SEG_OFF;
+            hex2 <= SEG_OFF;
+            hex3 <= SEG_OFF;
+        ELSIF rising_edge(clk_slow) THEN
+            hex0 <= SEG_OFF;
+            hex1 <= SEG_OFF;
+            hex2 <= SEG_OFF;
+            hex3 <= SEG_OFF;
+            
+            CASE display_state IS
+                WHEN 0 => hex3 <= SEG_2;
+                WHEN 1 => hex2 <= SEG_0;
+                WHEN 2 => hex1 <= SEG_2;
+                WHEN 3 => hex0 <= SEG_5;
+            END CASE;
+            
+            IF display_state = 3 THEN
+                display_state <= 0;
+            ELSE
+                display_state <= display_state + 1;
+            END IF;
+        END IF;
+    END PROCESS;
+END ARCHITECTURE behavior;
