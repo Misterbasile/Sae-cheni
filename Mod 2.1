@@ -1,0 +1,55 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_ARITH.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+ENTITY mode_2_1 IS
+    PORT (
+        CLOCK_50 : IN STD_LOGIC;
+        reset    : IN STD_LOGIC;
+        speed    : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        HEX0     : OUT STD_LOGIC_VECTOR(6 DOWNTO 0)
+    );
+END ENTITY mode_2_1;
+
+ARCHITECTURE behavior OF mode_2_1 IS
+    COMPONENT clock_divider
+        PORT (
+            CLOCK_50 : IN STD_LOGIC;
+            reset    : IN STD_LOGIC;
+            speed    : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+            clk_out  : OUT STD_LOGIC
+        );
+    END COMPONENT;
+
+    SIGNAL clk_slow : STD_LOGIC;
+    SIGNAL seg_index : INTEGER RANGE 0 TO 6 := 0;
+    SIGNAL segment_patterns : STD_LOGIC_VECTOR(6 DOWNTO 0) := "0000001";
+BEGIN
+    -- Instanciation du diviseur de fréquence
+    clk_div : clock_divider PORT MAP (
+        CLOCK_50 => CLOCK_50,
+        reset    => reset,
+        speed    => speed,
+        clk_out  => clk_slow
+    );
+
+    -- Processus pour gérer l'affichage successif des segments
+    PROCESS (clk_slow, reset)
+    BEGIN
+        IF reset = '1' THEN
+            seg_index <= 0;
+            HEX0 <= "0000001"; -- Allumage du premier segment 'a'
+        ELSIF rising_edge(clk_slow) THEN
+            HEX0 <= (OTHERS => '0');
+            HEX0(seg_index) <= '1'; -- Active le segment correspondant
+            
+            -- Passer au segment suivant
+            IF seg_index = 6 THEN
+                seg_index <= 0;
+            ELSE
+                seg_index <= seg_index + 1;
+            END IF;
+        END IF;
+    END PROCESS;
+END ARCHITECTURE behavior;
