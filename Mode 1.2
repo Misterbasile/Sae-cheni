@@ -46,3 +46,68 @@ BEGIN
     END PROCESS;
 
 END ARCHITECTURE behavior;
+____________
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+
+ENTITY chenillard_1_1 IS
+    PORT (
+        clk_out  : IN STD_LOGIC;
+        reset     : IN STD_LOGIC;
+        enable    : IN STD_LOGIC;  -- Activation du mode
+        leds_red  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+        leds_green: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+    );
+END ENTITY chenillard_1_1;
+
+ARCHITECTURE behavior OF chenillard_1_1 IS
+    SIGNAL led_index : INTEGER RANGE 0 TO 7 := 0;
+BEGIN
+    -- Processus pour gérer les LEDs rouges
+    PROCESS (clk_out, reset)
+    BEGIN
+        IF reset = '1' THEN
+            led_index <= 0;
+            leds_red  <= (OTHERS => '0');  
+            leds_green <= (OTHERS => '0');
+        ELSIF rising_edge(clk_out) THEN
+            IF enable = '1' THEN
+                leds_red   <= (OTHERS => '0');  
+                leds_red(led_index) <= '1';  
+                led_index <= (led_index + 1) MOD 8;  
+            END IF;
+        END IF;
+    END PROCESS;
+END ARCHITECTURE behavior;
+
+-- Mode 1.2 : Allumage des LEDs vertes en chenillard vers la gauche
+ENTITY chenillard_1_2 IS
+    PORT (
+        clk_out  : IN STD_LOGIC;
+        reset     : IN STD_LOGIC;
+        enable    : IN STD_LOGIC;  -- Activation du mode
+        leds_red  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+        leds_green: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+    );
+END ENTITY chenillard_1_2;
+
+ARCHITECTURE behavior OF chenillard_1_2 IS
+    SIGNAL led_index : INTEGER RANGE 0 TO 7 := 0;
+BEGIN
+    -- Processus pour gérer les LEDs vertes
+    PROCESS (clk_out, reset)
+    BEGIN
+        IF reset = '1' THEN
+            led_index <= 0;
+            leds_red  <= (OTHERS => '0');  
+            leds_green <= (OTHERS => '0');
+        ELSIF rising_edge(clk_out) THEN
+            IF enable = '1' THEN
+                leds_green   <= (OTHERS => '0');  
+                leds_green(led_index) <= '1';  
+                led_index <= (led_index + 1) MOD 8;  
+            END IF;
+        END IF;
+    END PROCESS;
+END ARCHITECTURE behavior;
+
